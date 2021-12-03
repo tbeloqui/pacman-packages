@@ -1,0 +1,53 @@
+# Maintainer:  Tulio Beloqui <beloquitulio@gmail.com>
+#
+# Inspired by https://github.com/Core-2-Extreme/Video_player_for_3DS
+# Credits to Core-2-Extreme
+
+pkgname=3ds-x264
+pkgver=master
+pkgrel=1
+pkgdesc="x264 is a free software library and application for encoding video streams into the H.264/MPEG-4 AVC compression format, and is released under the terms of the GNU GPL."
+arch=('any')
+url="https://www.videolan.org/developers/x264.html"
+license=(GNU,GPL)
+options=(!strip libtool staticlibs)
+makedepends=('dkp-toolchain-vars')
+groups=('3ds-portlibs')
+
+source=(
+  "https://code.videolan.org/videolan/x264/-/archive/master/x264-master.tar.bz2"
+)
+sha256sums=(
+  'c1527a33bb91dd1536605c2e9b4804e831db7893f7923bb8eaa8530579a63935'
+)
+
+build() {
+  source /opt/devkitpro/3dsvars.sh
+  cd x264-master
+
+  ./configure \
+    --host=arm-linux \
+    --cross-prefix=/opt/devkitpro/devkitARM/bin/arm-none-eabi- \
+    --prefix="${PORTLIBS_PREFIX}" \
+    --enable-static \
+    --disable-avs \
+    --disable-cli \
+    --disable-asm \
+    --disable-thread \
+    --disable-opencl \
+    --bit-depth=8 \
+    --chroma-format=420
+
+  make
+}
+
+package() {
+  source /opt/devkitpro/3dsvars.sh
+  cd x264-master
+
+  make install-lib-static
+
+  # license
+  install -Dm644 COPYING "$pkgdir"${PORTLIBS_PREFIX}/licenses/$pkgname/COPYING
+}
+
